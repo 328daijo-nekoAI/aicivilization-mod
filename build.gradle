@@ -76,6 +76,25 @@ shadowJar {
     relocate 'okio', 'com.aicivilization.mod.shaded.okio'
     relocate 'fi.iki.elonen', 'com.aicivilization.mod.shaded.nanohttpd'
     // gsonはForge本体に同梱済みのためrelocate不要
+
+    // META-INF/services/配下のサービス定義ファイルが依存ライブラリ間で重複した場合、
+    // 単純に片方を捨てるのではなく中身をマージする（ModLauncherが同じjarを
+    // 複数回検出してしまう不具合の原因になるため）。
+    mergeServiceFiles()
+
+    // shadowJarはCopyタスクではなくShadowJar固有のタスクのため、
+    // 上のtasks.withType(Copy)の重複排除設定が効かない。ここで明示的に設定する。
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // 依存ライブラリの署名情報が混入するとjarの検証で問題になることがあるため除去する
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+
+    // 依存ライブラリ内のJavaモジュール記述子が残っていると、ModLauncherが
+    // 同じjarを複数のモジュールとして誤検出することがあるため除去する
+    exclude 'module-info.class'
+    exclude '**/module-info.class'
 }
 
 reobf {
