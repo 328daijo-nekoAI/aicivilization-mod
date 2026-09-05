@@ -6,6 +6,7 @@ import com.aicivilization.mod.network.ModNetworking;
 import com.aicivilization.mod.network.packet.OpenSpawnSetupPacket;
 import com.aicivilization.mod.network.packet.SyncBrainPoolPacket;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -32,7 +33,7 @@ public final class ModCommands {
         );
     }
 
-    private static int openSpawnSetup(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
+    private static int openSpawnSetup(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         BrainProfilePool pool = BrainProfilePoolProvider.get(player.serverLevel());
         SyncBrainPoolPacket.sendTo(player, pool);
@@ -40,7 +41,7 @@ public final class ModCommands {
         return 1;
     }
 
-    private static int openBrainManagement(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
+    private static int openBrainManagement(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         BrainProfilePool pool = BrainProfilePoolProvider.get(player.serverLevel());
         SyncBrainPoolPacket.sendTo(player, pool);
@@ -51,7 +52,7 @@ public final class ModCommands {
         return 1;
     }
 
-    private static int showRecentLog(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) {
+    private static int showRecentLog(com.mojang.brigadier.context.CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         var entries = com.aicivilization.mod.memory.CivilizationLog.readRecent(player.serverLevel(), 15);
         if (entries.isEmpty()) {
