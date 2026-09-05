@@ -83,10 +83,13 @@ reobf {
 }
 
 // reobfJar（既定のリオブタスク）が、shadowJarの出力を暗黙に参照してしまい
-// タスク順序の検証エラーになるため、明示的な依存関係を宣言する
-tasks.named('reobfJar') {
-    dependsOn tasks.named('shadowJar')
-    mustRunAfter tasks.named('shadowJar')
+// タスク順序の検証エラーになるため、明示的な依存関係を宣言する。
+// ForgeGradleがreobfJarタスクを登録するタイミングの後に評価する必要があるため、
+// afterEvaluateで包む。
+afterEvaluate {
+    tasks.named('reobfJar') {
+        dependsOn tasks.named('shadowJar')
+        mustRunAfter tasks.named('shadowJar')
+    }
+    tasks.build.dependsOn tasks.named('reobfShadowJar')
 }
-
-tasks.build.dependsOn tasks.named('reobfShadowJar')
