@@ -70,6 +70,8 @@ dependencies {
 // 依存ライブラリをMod jarに同梱する（利用者が追加インストール不要にするため）
 shadowJar {
     archiveClassifier.set('')
+    from sourceSets.main.output
+    configurations = [project.configurations.runtimeClasspath]
     relocate 'okhttp3', 'com.aicivilization.mod.shaded.okhttp3'
     relocate 'okio', 'com.aicivilization.mod.shaded.okio'
     relocate 'fi.iki.elonen', 'com.aicivilization.mod.shaded.nanohttpd'
@@ -80,4 +82,11 @@ reobf {
     shadowJar {}
 }
 
-tasks.build.dependsOn tasks.reobfShadowJar
+// reobfJar（既定のリオブタスク）が、shadowJarの出力を暗黙に参照してしまい
+// タスク順序の検証エラーになるため、明示的な依存関係を宣言する
+tasks.named('reobfJar') {
+    dependsOn tasks.named('shadowJar')
+    mustRunAfter tasks.named('shadowJar')
+}
+
+tasks.build.dependsOn tasks.named('reobfShadowJar')
