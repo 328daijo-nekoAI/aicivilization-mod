@@ -44,11 +44,14 @@ minecraft {
     }
 }
 
-sourceSets.main.resources { srcDir 'src/main/resources' }
-
 repositories {
     mavenCentral()
     maven { url 'https://maven.minecraftforge.net/' }
+}
+
+// 依存関係のリソースとプロジェクト自身のリソースが重複した場合、最初のものを優先する
+tasks.withType(Copy).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 dependencies {
