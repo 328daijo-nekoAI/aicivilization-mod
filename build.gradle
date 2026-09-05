@@ -1,0 +1,80 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
+
+version = '0.1.0'
+group = 'com.aicivilization.mod'
+
+base {
+    archivesName = 'aicivilization'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                aicivilization {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run-server')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                aicivilization {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/main/resources' }
+
+repositories {
+    mavenCentral()
+    maven { url 'https://maven.minecraftforge.net/' }
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
+
+    // HTTP通信（Groq API呼び出し用）。okhttpはshadeしてMod内に同梱する。
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+    // JSON変換（Groqレスポンス解析・記憶ファイル保存用）
+    implementation 'com.google.code.gson:gson:2.10.1'
+
+    // 管理ダッシュボード用の軽量HTTPサーバー
+    implementation 'org.nanohttpd:nanohttpd:2.3.1'
+}
+
+// 依存ライブラリをMod jarに同梱する（利用者が追加インストール不要にするため）
+shadowJar {
+    archiveClassifier.set('')
+    relocate 'okhttp3', 'com.aicivilization.mod.shaded.okhttp3'
+    relocate 'okio', 'com.aicivilization.mod.shaded.okio'
+    relocate 'fi.iki.elonen', 'com.aicivilization.mod.shaded.nanohttpd'
+    // gsonはForge本体に同梱済みのためrelocate不要
+}
+
+reobf {
+    shadowJar {}
+}
+
+tasks.build.dependsOn tasks.reobfShadowJar
