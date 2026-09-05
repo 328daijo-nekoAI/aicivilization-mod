@@ -91,5 +91,9 @@ afterEvaluate {
         dependsOn tasks.named('shadowJar')
         mustRunAfter tasks.named('shadowJar')
     }
+    tasks.named('reobfShadowJar') {
+        dependsOn tasks.named('jar')
+        mustRunAfter tasks.named('jar')
+    }
     tasks.build.dependsOn tasks.named('reobfShadowJar')
 }
