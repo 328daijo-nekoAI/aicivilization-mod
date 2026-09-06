@@ -1,9 +1,5 @@
 package com.aicivilization.mod.dashboard;
 
-/**
- * ダッシュボードのHTML/CSS/JSをまとめた定数。
- * jarに埋め込んで配信するため、別ファイル読み込みではなく文字列として保持する。
- */
 public final class DashboardHtml {
 
     private DashboardHtml() {
@@ -41,13 +37,18 @@ public final class DashboardHtml {
                 <div>
                     <input id="newName" placeholder="プロファイル名">
                     <input id="newKey" placeholder="Groq APIキー" style="width:260px;">
-                    <input id="newModel" placeholder="モデル名" value="llama-3.3-70b-versatile" style="width:200px;">
+                    <input id="newModel" placeholder="モデル名" value="openai/gpt-oss-120b" style="width:200px;">
                     <button onclick="addBrain()">追加</button>
                 </div>
                 <table id="brainsTable">
                     <thead><tr><th>名前</th><th>キー</th><th>モデル</th><th>状態</th><th></th></tr></thead>
                     <tbody></tbody>
                 </table>
+            </div>
+
+            <div class="panel">
+                <h2>AI市民の一覧と持ち物</h2>
+                <div id="citizensList"></div>
             </div>
 
             <div class="panel">
@@ -99,7 +100,7 @@ public final class DashboardHtml {
             async function addBrain() {
                 const name = document.getElementById('newName').value || '無題の脳';
                 const apiKey = document.getElementById('newKey').value;
-                const model = document.getElementById('newModel').value || 'llama-3.3-70b-versatile';
+                const model = document.getElementById('newModel').value || 'openai/gpt-oss-120b';
                 if (!apiKey) { alert('APIキーを入力してください'); return; }
 
                 await fetch('/api/brains', {
@@ -165,10 +166,43 @@ public final class DashboardHtml {
                 return div.innerHTML;
             }
 
+            async function refreshCitizens() {
+                const res = await fetch('/api/citizens');
+                const citizens = await res.json();
+                const list = document.getElementById('citizensList');
+                list.innerHTML = '';
+
+                if (citizens.length === 0) {
+                    list.innerHTML = '<div style="color:#777">まだAIが出現していません。</div>';
+                    return;
+                }
+
+                for (const c of citizens) {
+                    const div = document.createElement('div');
+                    div.style.padding = '8px 0';
+                    div.style.borderBottom = '1px solid #3a3a44';
+
+                    const itemsText = c.items.length === 0
+                        ? '<span style="color:#777">（持ち物なし）</span>'
+                        : c.items.map(i => `<span class="tag">${escapeHtml(i.item.replace('minecraft:', ''))} x${i.count}</span>`).join(' ');
+
+                    div.innerHTML = `
+                        <strong>${escapeHtml(c.name)}</strong>
+                        ${c.isChild ? '<span class="tag">子供</span>' : ''}
+                        <span class="tag">幸福度 ${Math.round(c.happiness)}</span>
+                        <span class="tag">${c.hasHome ? '家あり' : '家なし'}</span>
+                        <div style="margin-top:4px;">${itemsText}</div>
+                    `;
+                    list.appendChild(div);
+                }
+            }
+
             refreshBrains();
             refreshLog();
+            refreshCitizens();
             setInterval(refreshLog, 10000);
             setInterval(refreshBrains, 15000);
+            setInterval(refreshCitizens, 8000);
             </script>
             </body>
             </html>
