@@ -54,24 +54,36 @@ tasks.withType(Copy).configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+// shadowJarに同梱する「本当に必要な依存ライブラリだけ」を集めた専用の設定を用意する。
+// project.configurations.runtimeClasspath をそのまま使うと、Forge/Minecraft本体が
+// 既に内部で持っているライブラリ（fastutil等）まで巻き込んでしまい、
+// 起動時にモジュールの重複エラーでクラッシュする原因になるため、
+// 明示的に「同梱したい依存だけ」を別のconfigurationに切り出す。
+configurations {
+    shadowOnly
+}
+
 dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.3.0'
 
     // HTTP通信（Groq API呼び出し用）。okhttpはshadeしてMod内に同梱する。
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    shadowOnly 'com.squareup.okhttp3:okhttp:4.12.0'
 
     // JSON変換（Groqレスポンス解析・記憶ファイル保存用）
     implementation 'com.google.code.gson:gson:2.10.1'
+    shadowOnly 'com.google.code.gson:gson:2.10.1'
 
     // 管理ダッシュボード用の軽量HTTPサーバー
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
+    shadowOnly 'org.nanohttpd:nanohttpd:2.3.1'
 }
 
 // 依存ライブラリをMod jarに同梱する（利用者が追加インストール不要にするため）
 shadowJar {
     archiveClassifier.set('')
     from sourceSets.main.output
-    configurations = [project.configurations.runtimeClasspath]
+    configurations = [project.configurations.shadowOnly]
     relocate 'okhttp3', 'com.aicivilization.mod.shaded.okhttp3'
     relocate 'okio', 'com.aicivilization.mod.shaded.okio'
     relocate 'fi.iki.elonen', 'com.aicivilization.mod.shaded.nanohttpd'
