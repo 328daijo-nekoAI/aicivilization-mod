@@ -15,6 +15,7 @@ import java.util.Optional;
 
 /**
  * AIが地表付近の石ブロックを見つけて採掘する行動。
+ * GatherWoodGoalと同じ探索→接近→破壊→インベントリ追加のパターンを踏襲する。
  */
 public class MineStoneGoal extends Goal {
 
@@ -90,7 +91,7 @@ public class MineStoneGoal extends Goal {
         BlockState state = level.getBlockState(targetStone);
         if (isMinableStone(state.getBlock())) {
             level.destroyBlock(targetStone, false);
-            citizen.getInventory().add(new ItemStack(Items.COBBLESTONE, 1));
+            citizen.getInventory().addItem(new ItemStack(Items.COBBLESTONE, 1));
         }
         targetStone = null;
         breakProgressTicks = 0;
