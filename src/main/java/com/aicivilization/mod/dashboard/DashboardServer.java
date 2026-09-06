@@ -140,7 +140,7 @@ public class DashboardServer extends NanoHTTPD {
         Map<String, String> body = parseBody(session);
         String name = body.getOrDefault("name", "無題の脳");
         String key = body.get("apiKey");
-        String model = body.getOrDefault("model", "llama-3.3-70b-versatile");
+        String model = body.getOrDefault("model", "openai/gpt-oss-120b");
 
         if (key == null || key.isBlank()) {
             return newFixedLengthResponse(Response.Status.BAD_REQUEST, "application/json", "{\"error\":\"apiKeyは必須です\"}");
@@ -187,7 +187,8 @@ public class DashboardServer extends NanoHTTPD {
             CitizenMemoryStore.save(overworld(), id, data);
             return jsonResponse("{\"saved\":true}");
         } catch (IllegalArgumentException e) {
-            return newFixedLengthResponse(Response.Status.BAD_REQUEST, "application/json", "{\"error\":\"不正なID\"}");
+            return newFixedLengthResponse(Response.Status.BAD_REQUEST, "app
+                                        lication/json", "{\"error\":\"不正なID\"}");
         }
     }
 
