@@ -70,9 +70,11 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     shadowOnly 'com.squareup.okhttp3:okhttp:4.12.0'
 
-    // JSON変換（Groqレスポンス解析・記憶ファイル保存用）
-    implementation 'com.google.code.gson:gson:2.10.1'
-    shadowOnly 'com.google.code.gson:gson:2.10.1'
+    // JSON変換（Groqレスポンス解析・記憶ファイル保存用）。
+    // gsonはForge/Minecraft本体が既に内部で同梱・使用しているため、
+    // Mod側のjarに二重に含めるとモジュール解決エラーで起動時クラッシュする。
+    // compileOnlyでコンパイル時にのみ使い、実行時はForge本体のgsonを使う。
+    compileOnly 'com.google.code.gson:gson:2.10.1'
 
     // 管理ダッシュボード用の軽量HTTPサーバー
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
