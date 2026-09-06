@@ -14,13 +14,13 @@ public final class GroqModels {
     private GroqModels() {
     }
 
-    public static final String DEFAULT_MODEL = "llama-3.3-70b-versatile";
+    public static final String DEFAULT_MODEL = "openai/gpt-oss-120b";
 
     /** GUIのドロップダウンに出すおすすめモデル一覧。 */
     public static final List<String> RECOMMENDED = List.of(
-            "llama-3.3-70b-versatile",   // 高性能・重要な判断向け
-            "llama-3.1-8b-instant",       // 軽量・高速・日常会話向け
-            "gemma2-9b-it",                // バランス型
-            "mixtral-8x7b-32768"           // 長文コンテキスト向け（記憶量が多いAI向け）
+            "openai/gpt-oss-120b",   // 高性能・重要な判断向け（旧llama-3.3-70b-versatile相当）
+            "openai/gpt-oss-20b",     // 軽量・高速・日常会話向け（旧llama-3.1-8b-instant相当）
+            "qwen/qwen3.6-27b",       // バランス型
+            "meta-llama/llama-4-scout-17b-16e-instruct" // 長文コンテキスト向け
     );
 }
