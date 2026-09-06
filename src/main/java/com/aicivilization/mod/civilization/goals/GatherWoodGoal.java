@@ -93,7 +93,7 @@ public class GatherWoodGoal extends Goal {
         BlockState state = level.getBlockState(targetLog);
         if (isLog(state)) {
             level.destroyBlock(targetLog, false);
-            citizen.getInventory().add(new ItemStack(Items.OAK_LOG, 1));
+            citizen.getInventory().addItem(new ItemStack(Items.OAK_LOG, 1));
         }
         targetLog = null;
         breakProgressTicks = 0;
