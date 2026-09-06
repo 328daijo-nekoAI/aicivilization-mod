@@ -4,6 +4,7 @@ import com.aicivilization.mod.AICivilizationMod;
 import com.aicivilization.mod.brain.BrainProfile;
 import com.aicivilization.mod.brain.BrainProfilePool;
 import com.aicivilization.mod.brain.BrainProfilePoolProvider;
+import com.aicivilization.mod.entity.AICitizenEntity;
 import com.aicivilization.mod.memory.CitizenMemoryData;
 import com.aicivilization.mod.memory.CitizenMemoryStore;
 import com.aicivilization.mod.memory.CivilizationLog;
@@ -12,6 +13,7 @@ import com.google.gson.GsonBuilder;
 import fi.iki.elonen.NanoHTTPD;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,6 +92,10 @@ public class DashboardServer extends NanoHTTPD {
 
             if (uri.equals("/api/log") && method == Method.GET) {
                 return jsonResponse(getLogJson());
+            }
+
+            if (uri.equals("/api/citizens") && method == Method.GET) {
+                return jsonResponse(getCitizensJson());
             }
 
             return newFixedLengthResponse(Response.Status.NOT_FOUND, "text/plain", "Not Found");
@@ -178,6 +184,34 @@ public class DashboardServer extends NanoHTTPD {
     private String getLogJson() {
         List<CivilizationLog.LogEntry> entries = CivilizationLog.readRecent(overworld(), 100);
         return GSON.toJson(entries);
+    }
+
+    private String getCitizensJson() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (AICitizenEntity citizen : overworld().getEntitiesOfClass(AICitizenEntity.class,
+                new net.minecraft.world.phys.AABB(-3.0E7, -2048, -3.0E7, 3.0E7, 2048, 3.0E7))) {
+
+            List<Map<String, Object>> items = new ArrayList<>();
+            var inventory = citizen.getInventory();
+            for (int i = 0; i < inventory.getContainerSize(); i++) {
+                ItemStack stack = inventory.getItem(i);
+                if (!stack.isEmpty()) {
+                    items.add(Map.of(
+                            "item", stack.getItem().toString(),
+                            "count", stack.getCount()
+                    ));
+                }
+            }
+
+            list.add(Map.of(
+                    "name", citizen.getCitizenName(),
+                    "isChild", citizen.isAIChild(),
+                    "happiness", citizen.getHappiness(),
+                    "hasHome", citizen.getResidenceData().hasHome(),
+                    "items", items
+            ));
+        }
+        return GSON.toJson(list);
     }
 
     private Map<String, String> parseBody(IHTTPSession session) throws java.io.IOException, ResponseException {
